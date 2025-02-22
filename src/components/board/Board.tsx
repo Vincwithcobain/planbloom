@@ -1,8 +1,10 @@
-
 import { useState } from "react";
 import { Column } from "./Column";
 import { Board as BoardType, Card, Column as ColumnType } from "@/types/board";
 import { useAuth } from "@/contexts/AuthContext";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Plus } from "lucide-react";
 
 const initialBoard: BoardType = {
   id: "1",
@@ -18,6 +20,7 @@ const initialBoard: BoardType = {
           description: "Study the basics",
           createdBy: "user1",
           createdAt: new Date().toISOString(),
+          assignedUsers: [],
         },
         { 
           id: "2", 
@@ -25,6 +28,7 @@ const initialBoard: BoardType = {
           description: "Apply knowledge",
           createdBy: "user1",
           createdAt: new Date().toISOString(),
+          assignedUsers: [],
         },
       ],
       createdBy: "user1",
@@ -39,6 +43,7 @@ const initialBoard: BoardType = {
           description: "Using React and TypeScript",
           createdBy: "user1",
           createdAt: new Date().toISOString(),
+          assignedUsers: [],
         },
       ],
       createdBy: "user1",
@@ -52,6 +57,7 @@ const initialBoard: BoardType = {
           title: "Setup Development Environment",
           createdBy: "user1",
           createdAt: new Date().toISOString(),
+          assignedUsers: [],
         },
       ],
       createdBy: "user1",
@@ -68,13 +74,10 @@ export const Board = () => {
     cardId: string;
     sourceColumnId: string;
   } | null>(null);
+  const [newColumnTitle, setNewColumnTitle] = useState("");
   const { user } = useAuth();
 
-  const handleDragStart = (
-    e: React.DragEvent,
-    cardId: string,
-    columnId: string
-  ) => {
+  const handleDragStart = (e: React.DragEvent, cardId: string, columnId: string) => {
     setDraggedCard({ cardId, sourceColumnId: columnId });
   };
 
@@ -122,17 +125,53 @@ export const Board = () => {
     setDraggedCard(null);
   };
 
+  const addColumn = () => {
+    if (!newColumnTitle.trim()) return;
+    
+    const newColumn: ColumnType = {
+      id: Date.now().toString(),
+      title: newColumnTitle,
+      cards: [],
+      createdBy: user?.id || "unknown",
+    };
+
+    setBoard({
+      ...board,
+      columns: [...board.columns, newColumn],
+    });
+    setNewColumnTitle("");
+  };
+
   return (
-    <div className="flex overflow-x-auto p-6 min-h-screen bg-trello bg-gradient-to-br from-gray-800 to-gray-900">
-      {board.columns.map((column) => (
-        <Column
-          key={column.id}
-          column={column}
-          onDragStart={handleDragStart}
-          onDragOver={handleDragOver}
-          onDrop={handleDrop}
-        />
-      ))}
+    <div className="flex flex-col h-screen bg-gray-900">
+      <div className="p-4 border-b border-gray-700">
+        <div className="flex items-center gap-4">
+          <Input
+            placeholder="New Column Title"
+            value={newColumnTitle}
+            onChange={(e) => setNewColumnTitle(e.target.value)}
+            className="max-w-xs bg-gray-800 text-gray-100 border-gray-700"
+          />
+          <Button onClick={addColumn} className="bg-gray-700 hover:bg-gray-600">
+            <Plus className="w-4 h-4 mr-2" />
+            Add Column
+          </Button>
+        </div>
+      </div>
+      <div className="flex-1 overflow-x-auto p-6">
+        <div className="flex gap-4">
+          {board.columns.map((column) => (
+            <Column
+              key={column.id}
+              column={column}
+              onDragStart={handleDragStart}
+              onDragOver={handleDragOver}
+              onDrop={handleDrop}
+              isAdmin={user?.isAdmin || false}
+            />
+          ))}
+        </div>
+      </div>
     </div>
   );
 };
