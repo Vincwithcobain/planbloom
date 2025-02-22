@@ -15,42 +15,50 @@ interface AuthContextType {
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
+// Mock user data for testing
+const mockUsers: User[] = [
+  {
+    id: '1',
+    email: 'admin@admin.com',
+    name: 'Admin User',
+    isAdmin: true,
+    createdAt: new Date().toISOString(),
+  }
+];
+
 export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
   const [user, setUser] = useState<User | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const { toast } = useToast();
 
-  const API_URL = 'http://localhost:3001/api'; // You'll need to set up this backend server
-
   useEffect(() => {
     const token = localStorage.getItem('token');
     if (token) {
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      checkAuth();
-    } else {
-      setIsLoading(false);
+      const savedUser = localStorage.getItem('user');
+      if (savedUser) {
+        setUser(JSON.parse(savedUser));
+      }
     }
+    setIsLoading(false);
   }, []);
 
-  const checkAuth = async () => {
-    try {
-      const response = await axios.get<User>(`${API_URL}/auth/me`);
-      setUser(response.data);
-    } catch (error) {
-      localStorage.removeItem('token');
-      delete axios.defaults.headers.common['Authorization'];
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
+  // Temporary mock login function
   const login = async (credentials: LoginCredentials) => {
     try {
-      const response = await axios.post<AuthResponse>(`${API_URL}/auth/login`, credentials);
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(user);
+      // For testing, accept any email/password combination
+      const mockUser: User = {
+        id: '2',
+        email: credentials.email,
+        name: credentials.email.split('@')[0],
+        isAdmin: credentials.email === 'admin@admin.com',
+        createdAt: new Date().toISOString(),
+      };
+
+      const mockToken = 'mock-jwt-token';
+      localStorage.setItem('token', mockToken);
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUser(mockUser);
+      
       toast({
         title: "Success",
         description: "Logged in successfully",
@@ -65,13 +73,22 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
     }
   };
 
+  // Temporary mock register function
   const register = async (credentials: RegisterCredentials) => {
     try {
-      const response = await axios.post<AuthResponse>(`${API_URL}/auth/register`, credentials);
-      const { token, user } = response.data;
-      localStorage.setItem('token', token);
-      axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      setUser(user);
+      const mockUser: User = {
+        id: Date.now().toString(),
+        email: credentials.email,
+        name: credentials.name,
+        isAdmin: credentials.email === 'admin@admin.com',
+        createdAt: new Date().toISOString(),
+      };
+
+      const mockToken = 'mock-jwt-token';
+      localStorage.setItem('token', mockToken);
+      localStorage.setItem('user', JSON.stringify(mockUser));
+      setUser(mockUser);
+
       toast({
         title: "Success",
         description: "Registered successfully",
@@ -88,7 +105,7 @@ export const AuthProvider = ({ children }: { children: React.ReactNode }) => {
 
   const logout = () => {
     localStorage.removeItem('token');
-    delete axios.defaults.headers.common['Authorization'];
+    localStorage.removeItem('user');
     setUser(null);
     toast({
       title: "Success",
