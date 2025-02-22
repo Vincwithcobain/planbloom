@@ -2,16 +2,32 @@
 import { useState } from "react";
 import { Column } from "./Column";
 import { Board as BoardType, Card, Column as ColumnType } from "@/types/board";
+import { useAuth } from "@/contexts/AuthContext";
 
 const initialBoard: BoardType = {
+  id: "1",
+  title: "Main Board",
   columns: [
     {
       id: "1",
       title: "To Do",
       cards: [
-        { id: "1", title: "Learn TypeScript", description: "Study the basics" },
-        { id: "2", title: "Build a project", description: "Apply knowledge" },
+        { 
+          id: "1", 
+          title: "Learn TypeScript", 
+          description: "Study the basics",
+          createdBy: "user1",
+          createdAt: new Date().toISOString(),
+        },
+        { 
+          id: "2", 
+          title: "Build a project", 
+          description: "Apply knowledge",
+          createdBy: "user1",
+          createdAt: new Date().toISOString(),
+        },
       ],
+      createdBy: "user1",
     },
     {
       id: "2",
@@ -21,17 +37,29 @@ const initialBoard: BoardType = {
           id: "3",
           title: "Create Trello Clone",
           description: "Using React and TypeScript",
+          createdBy: "user1",
+          createdAt: new Date().toISOString(),
         },
       ],
+      createdBy: "user1",
     },
     {
       id: "3",
       title: "Done",
       cards: [
-        { id: "4", title: "Setup Development Environment" },
+        { 
+          id: "4", 
+          title: "Setup Development Environment",
+          createdBy: "user1",
+          createdAt: new Date().toISOString(),
+        },
       ],
+      createdBy: "user1",
     },
   ],
+  users: [],
+  createdBy: "user1",
+  createdAt: new Date().toISOString(),
 };
 
 export const Board = () => {
@@ -40,6 +68,7 @@ export const Board = () => {
     cardId: string;
     sourceColumnId: string;
   } | null>(null);
+  const { user } = useAuth();
 
   const handleDragStart = (
     e: React.DragEvent,
@@ -86,12 +115,15 @@ export const Board = () => {
       return col;
     });
 
-    setBoard({ columns: newColumns });
+    setBoard({
+      ...board,
+      columns: newColumns,
+    });
     setDraggedCard(null);
   };
 
   return (
-    <div className="flex overflow-x-auto p-6 min-h-screen bg-trello bg-gradient-to-br from-gray-100 to-gray-200">
+    <div className="flex overflow-x-auto p-6 min-h-screen bg-trello bg-gradient-to-br from-gray-800 to-gray-900">
       {board.columns.map((column) => (
         <Column
           key={column.id}

@@ -17,11 +17,11 @@ export const Column = ({
 }: ColumnProps) => {
   return (
     <div
-      className="w-72 mx-2 p-4 rounded-lg bg-trello-column backdrop-blur-sm"
+      className="w-72 mx-2 p-4 rounded-lg bg-gray-800/80 backdrop-blur-sm border border-gray-700"
       onDragOver={onDragOver}
       onDrop={(e) => onDrop(e, column.id)}
     >
-      <h2 className="font-semibold mb-4 text-gray-700">{column.title}</h2>
+      <h2 className="font-semibold mb-4 text-gray-100">{column.title}</h2>
       <div className="min-h-[200px]">
         {column.cards.map((card) => (
           <Card
